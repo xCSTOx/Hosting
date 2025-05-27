@@ -2,8 +2,17 @@
 FROM maven:3.9.4-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Salin semua file dan build project
-COPY . .
+# Salin Maven wrapper files dengan permission yang tepat
+COPY mvnw .
+COPY .mvn .mvn
+RUN chmod +x ./mvnw
+
+# Salin pom.xml dan download dependencies
+COPY pom.xml .
+RUN ./mvnw dependency:go-offline -B
+
+# Salin source code dan build
+COPY src ./src
 RUN ./mvnw package -DskipTests
 
 # Stage 2: Jalankan aplikasi dari JAR
